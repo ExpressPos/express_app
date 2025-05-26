@@ -30,3 +30,11 @@ LOGS CONFIGURATION
 Windows: C:\Users\<NombreDeUsuario>\AppData\Roaming\express_app
 macOS: /Users/<NombreDeUsuario>/Library/Application Support/express_app
 Linux: /home/<NombreDeUsuario>/.config/express_app
+
+************************************ Release ************************************
+
+1. Cambiar el nro de version en el "package.json"
+2. Correr "npm run release"
+3. En windows esto genera 3 archivos(latest.yml, Express.Pos.Setup.VERSION.exe, Express.Pos.Setup.VERSION.exe.blockmap) en /dist
+4. En linux esto genera 2 archivos(latest-linux.yml, Express.Pos.VERSION.AppImage) en /dist
+5. Subir estos archivos a un release nuevo en GitHub y marcar el release como "latest", para que los clientes, automaticamente descarguen e instalen la nueva versión

@@ -8,8 +8,8 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "after-publish": "electron-builder -p never",
-    "publish": "npm run package && npm run after-publish",
+    "publish": "electron-builder -p never",
+    "release": "npm run package && npm run publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
   "devDependencies": {
