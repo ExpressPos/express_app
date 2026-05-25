@@ -1,10 +1,11 @@
 import {PrinterModel} from "../model/printer-model";
 import {ServerConfigModel} from "../model/server-config-model";
-import usb, {Device} from "usb";
+import usb, {Device, OutEndpoint} from "usb";
 import console from "node:console";
 import {ConfigModel} from "../model/config-model";
 import {Utils} from "../config/utils";
 import WindowManager from "../windowManager";
+import {PrintJob} from "./print-job";
 
 class PrinterManager {
 
@@ -15,6 +16,10 @@ class PrinterManager {
     private connectedDevices = {};
     private interval;
     private timeCheck = 30000;
+    private printQueue: PrintJob[] = [];
+    private printerInUse = false;
+    private printing  = false;
+
     private deviceMapper = {"10032:8200": {"G3Q0DQ==": "G3QJDQ=="}, "1208:514": {"G3Q0DQ==": "G3QQDQ=="}};
 
     constructor(serverConfig: ServerConfigModel, windowManager: WindowManager, configModel: ConfigModel, utils: Utils) {
@@ -76,23 +81,119 @@ class PrinterManager {
     async openDrawer() {
         for (const key in this.connectedDevices) {
             if (Object.prototype.hasOwnProperty.call(this.connectedDevices, key)) {
-                await this.getStatusDrawerInfo(this.connectedDevices[key], true);
+                const device = this.connectedDevices[key];
+                if (!device.isBusy) { // Implementa una bandera para marcar el estado del dispositivo
+                    device.isBusy = true;
+                    try {
+                        await this.getStatusDrawerInfo(device, true);
+                    } finally {
+                        device.isBusy = false; // Libera el lock
+                    }
+                }
             }
         }
     }
 
     public async printLines(deviceModel: PrinterModel, commands: string[]) {
-        try {
-            for (const line of commands.reverse()) {
-                await this.sendBulkDataToPrinter(deviceModel, line);
+        if (commands && commands.length > 0) {
+            try {
+                for (const line of commands.reverse()) {
+                    //await this.sendBulkDataToPrinter(deviceModel, line);
+                    //await this.sendToPrinterSafely(deviceModel, line);
+                    this.enqueuePrint(deviceModel, line);
+                }
+            } catch (error) {
+                console.error("Error during printing:", error);
             }
+        }
+    }
+
+    public enqueuePrint(deviceModel: PrinterModel, data: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.printQueue.push({ deviceModel, data, resolve, reject });
+            this.processPrintQueue();
+        });
+    }
+
+    private async processPrintQueue() {
+        if (this.printing || this.printQueue.length === 0) return;
+
+        this.printing = true;
+
+        const { deviceModel, data, resolve, reject } = this.printQueue.shift()!;
+
+        try {
+            await this.sendBulkDataToPrinter(deviceModel, data);
+            resolve();
+        } catch (err) {
+            reject(err);
+        } finally {
+            this.printing = false;
+            setImmediate(() => this.processPrintQueue()); // procesa el siguiente job
+        }
+    }
+
+    public async sendToPrinterSafely(deviceModel: PrinterModel, data: string): Promise<void> {
+        if (this.printerInUse) {
+            console.warn("Printer is busy, skipping request.");
+            return;
+        }
+
+        this.printerInUse = true;
+
+        const commandBuffer = Buffer.from(data);
+
+        try {
+            if (!deviceModel) throw new Error('Device model not provided');
+
+            const device: Device | undefined = this.findDeviceByVendorAndProduct(deviceModel.vendorId, deviceModel.productId);
+            if (!device) throw new Error('Device not found');
+
+            // Ensure device is open
+            try {
+                device.open();
+            } catch (err) {
+                console.warn('Device already open or failed to open:', err);
+            }
+
+            const iface = device.interfaces[0];
+            if (!iface) throw new Error('No interfaces available on device');
+
+            try {
+                iface.claim();
+            } catch (err) {
+                throw new Error('Failed to claim interface: ' + err);
+            }
+
+            const outEndpoint = iface.endpoints.find(endpoint => endpoint.direction === 'out') as OutEndpoint;
+            if (!outEndpoint) throw new Error('No OUT endpoint found');
+
+            await new Promise<void>((resolve, reject) => {
+                outEndpoint.transfer(commandBuffer, (error) => {
+                    if (error) return reject(error);
+                    resolve();
+                });
+            });
+
         } catch (error) {
-            console.error("Error during printing:", error);
+            console.error('Failed to send data to printer:', error);
+            throw error;
+        } finally {
+            try {
+                // Close device safely
+                const device = this.findDeviceByVendorAndProduct(deviceModel.vendorId, deviceModel.productId);
+                if (device) device.close();
+            } catch (closeErr) {
+                console.warn('Error closing device:', closeErr);
+            }
+
+            this.printerInUse = false;
         }
     }
 
     public sendBulkDataToPrinter(deviceModel: PrinterModel, data: string): Promise<void> {
         return new Promise((resolve, reject) => {
+            //console.log("Send bulk data to printer")
             const commandBuffer = Buffer.from(data);
             if (deviceModel) {
                 const device: Device = this.findDeviceByVendorAndProduct(deviceModel.vendorId, deviceModel.productId);
@@ -106,12 +207,22 @@ class PrinterManager {
                         return reject('Device disconnected');
                     }
                     outEndpoint.transfer(commandBuffer, (error) => {
-                        device.close();
                         if (error) {
                             console.error('Error send data to printer:', error);
+                            try {
+                                device.close(); // Attempt close on error
+                            } catch (closeErr) {
+                                console.error('Error closing device:', closeErr);
+                            }
                             return reject(error);
                         } else {
-                            return resolve();
+                            try {
+                                device.close();
+                                return resolve();
+                            } catch (closeErr) {
+                                console.error('Error closing device:', closeErr);
+                                return reject(closeErr);
+                            }
                         }
                     });
                 } else {
@@ -185,7 +296,6 @@ class PrinterManager {
                                     event: "geopos3-cashDrawer-opened"
                                 })
                             }
-
                             resolve(isDrawerClosed);
                         });
                     }

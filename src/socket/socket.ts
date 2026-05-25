@@ -16,10 +16,13 @@ class Socket {
     public connectSocket(): void {
         console.log("Connecting socket with url: " + this.configModel.serverConfig.socketUrl)
         this.stompClient = Stomp.overWS(this.configModel.serverConfig.socketUrl);
+        //this.stompClient = Stomp.overWS("ws://localhost:15674/ws");
         const decodedString = Buffer.from(this.configModel.serverConfig.uri, 'base64').toString('utf-8');
         console.log("Connecting socket with credentials: " + decodedString);
+        //console.log("Connecting socket with credentials: " +  "ws://localhost:15674/ws");
         const credentials = decodedString.split(':');
         this.stompClient.connect(credentials[0], credentials[1],
+        //this.stompClient.connect("geoexpress", "geocom123",
             this.connectSocketSuccess.bind(this),
             this.connectSocketError.bind(this));
     }
@@ -29,6 +32,7 @@ class Socket {
     }
 
     public onGetData(data): void {
+        console.log("Event socket data : " + JSON.stringify(data));
         const body = JSON.parse(data.body);
         if (body.deviceName != null) {
             //OTHER JOBS

@@ -151,9 +151,10 @@ class WindowManager {
     console.log("Chromium version: " + process.versions.chrome);
     this.mainWindow.loadURL(config.url);
     const cache = true;
+    const urlFront = config.url;
     if (cache) {
       const cacheBuster = new Date().getTime();
-      const urlWithCacheBuster = `${config.url}?cb=${cacheBuster}`;
+      const urlWithCacheBuster = `${urlFront}?cb=${cacheBuster}`;
       this.mainWindow.loadURL(urlWithCacheBuster);
       this.mainWindow.webContents.session.clearStorageData();
       this.mainWindow.webContents.session.clearCache().then(() => {

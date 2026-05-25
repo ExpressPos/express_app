@@ -68,7 +68,7 @@ class Config {
             console.log('Server config: ' + response);
             this._serverConfig = JSON.parse(response);
         } catch (error) {
-            console.error('Error fetching server config:', error);
+            console.error('Error fetching server config:', JSON.stringify(error));
             throw error;
         }
     }
