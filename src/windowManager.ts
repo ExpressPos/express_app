@@ -104,6 +104,7 @@ class WindowManager {
     }
     const appVersion = app.getVersion();
     console.log('Version: ' + appVersion)
+    //this.configWindow.webContents.openDevTools({ mode: 'detach' });
     return this.configWindow;
   }
 
@@ -276,6 +277,7 @@ class WindowManager {
   };
 
   public sendToMainWindows(data: EventModel) {
+    console.log("Sended to client:" + JSON.stringify(data));
     this.mainWindow?.webContents.send("EXPRESS_TO_CLIENT", {
       status: data
     });

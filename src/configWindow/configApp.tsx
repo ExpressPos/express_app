@@ -1,8 +1,14 @@
 import React, {useState} from "react";
 import "./styles.css";
+import { ConfigModel } from "src/model/config-model";
+import config from "forge.config";
 
 const ConfigApp = () => {
     const [selectedOption, setSelectedOption] = useState('');
+    const [companyId, setCompanyId] = useState('');
+    const [terminalId, setTerminalId] = useState('');
+    const [urlAPG, setUrlAPG] = useState('');
+    const [secret, setSecret] = useState('');
 
     const handleChange = (e) => {
         setSelectedOption(e.target.value);
@@ -10,12 +16,29 @@ const ConfigApp = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (selectedOption && selectedOption !== '') {
+        if (selectedOption && selectedOption !== '' &&
+            companyId !== '' &&
+            terminalId !== '' &&
+            urlAPG !== '' &&
+            secret !== '') {
             console.log('Valor seleccionado:', selectedOption);
+            console.log('companyId:', companyId);
+            console.log('terminalId:', terminalId);
+            console.log('urlAPG:', urlAPG);
+            console.log('secret:', secret);
             try {
-                window.electronAPI.setConfigUrl(selectedOption);
+                const config: ConfigModel = {
+                    url: selectedOption,
+                    invertDisplay: false,
+                    clientDeviceId: "",
+                    companyId: companyId,
+                    terminalId: terminalId,
+                    apgUrl: urlAPG,
+                    secret: secret
+                }
+                window.electronAPI.setConfig(JSON.stringify(config));
             } catch (error) {
-                console.error('Error al obtener el path del logo:', error);
+                console.error('Error creando la config local:', error);
             }
         }
     };
@@ -46,6 +69,42 @@ const ConfigApp = () => {
                     <option value="https://qaexpress.geocom.com.uy">QAExpress</option>
                     <option value="https://xprargentina.geocom.com.uy">XprArgentina</option>
                 </select>
+
+                <label htmlFor="companyId">Company ID:</label>
+                <input
+                    id="companyId"
+                    type="text"
+                    value={companyId}
+                    onChange={(e) => setCompanyId(e.target.value)}
+                    placeholder="Company ID"
+                />
+
+                <label htmlFor="terminalId">Terminal ID:</label>
+                <input
+                    id="terminalId"
+                    type="text"
+                    value={terminalId}
+                    onChange={(e) => setTerminalId(e.target.value)}
+                    placeholder="Terminal ID"
+                />
+
+                <label htmlFor="urlAPG">URL APG:</label>
+                <input
+                    id="urlAPG"
+                    type="text"
+                    value={urlAPG}
+                    onChange={(e) => setUrlAPG(e.target.value)}
+                    placeholder="URL APG"
+                />
+
+                <label htmlFor="secret">Secret:</label>
+                <input
+                    id="secret"
+                    type="password"
+                    value={secret}
+                    onChange={(e) => setSecret(e.target.value)}
+                    placeholder="Secret"
+                />
 
                 <button className="save-button" type="submit">Guardar</button>
             </form>

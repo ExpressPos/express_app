@@ -4,9 +4,9 @@ import {UsbManager} from "./printer/usb-manager";
 import {Log} from "./config/log";
 import {PrinterManager} from "./printer/printer-manager";
 import {Utils} from "./config/utils";
-import Socket from "./socket/socket";
 import WindowManager from "./windowManager";
 import { autoUpdater } from 'electron-updater';
+import { ConfigModel } from './model/config-model';
 
 new Log();
 const utils = new Utils();
@@ -18,9 +18,9 @@ async function main() {
     await app.whenReady();
     windowManager.openConfigWindows();
 
-    ipcMain.on('set-config-url', (event, args) => {
-      config.setConfigUrl(args);
-      console.log("Restarting app with configUrl: " + JSON.stringify(args));
+    ipcMain.on('set-config', (event, args) => {
+      config.setConfig(args);
+      console.log("Restarting app with config: " + JSON.stringify(args));
       main().catch((error) => {
         console.error("Error in initialization:", error);
       });
@@ -37,7 +37,7 @@ async function main() {
     const printerManager = new PrinterManager(config.serverConfig, windowManager, config.config, utils);
     console.log("Config:" + JSON.stringify(config));
     const usbManager = new UsbManager(printerManager);
-    new Socket(config, printerManager);
+    //new Socket(config, printerManager);
     usbManager.startUsbListener();
     printerManager.startCheckPrinter();
 
@@ -104,9 +104,8 @@ async function main() {
       app.quit();
     });
 
-    ipcMain.on('set-config-url', (url) => {
-      console.log("Url:" + url);
-      this.config.setConfigUrl(url);
+    ipcMain.on('set-config', (_event, configString: string) => {
+      config.setConfig(configString);
       windowManager.closeWindow();
       main().catch((error) => {
         console.error("Error in initialization:", error);

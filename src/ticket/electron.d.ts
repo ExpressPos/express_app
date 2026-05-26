@@ -1,5 +1,5 @@
 export interface ElectronAPI {
-    setConfigUrl: (key: string) => Promise<string | null>;
+    setConfig: (key: string) => Promise<string | null>;
     getLocalStorage: (key: string) => Promise<string | null>;
     getServerUrl: () => string;
     getVideoPath: () => string;
