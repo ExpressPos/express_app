@@ -42,6 +42,8 @@ const ConfigApp = () => {
                     <option value="">-- Elija una opción --</option>
                     <option value="https://posexpress.geocom.com.uy">PosExpress</option>
                     <option value="https://posexpressmobile.geocom.com.uy">PosExpressMobile</option>
+                    <option value="https://xprandroid.geocom.com.uy">XprAndroid</option>
+                    <option value="https://xprstg.geocom.com.uy">XprStg</option>
                     <option value="https://argentina.geocom.com.uy">Argentina</option>
                     <option value="https://qaexpress.geocom.com.uy">QAExpress</option>
                     <option value="https://xprargentina.geocom.com.uy">XprArgentina</option>
