@@ -70,6 +70,7 @@ const ConfigApp = () => {
                     <option value="https://argentina.geocom.com.uy">Argentina</option>
                     <option value="https://qaexpress.geocom.com.uy">QAExpress</option>
                     <option value="https://xprargentina.geocom.com.uy">XprArgentina</option>
+                    <option value="https://expresspos-test.firstData.com">CAT Fiserv</option>
                 </select>
 
                 <label htmlFor="companyId">Company ID:</label>
