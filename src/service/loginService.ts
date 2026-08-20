@@ -5,7 +5,7 @@ import { ConfigModel } from "../model/config-model";
 
 class LoginService {
 
-    public async login(config: ConfigModel, pin: string): Promise<string> {
+    public async login(config: ConfigModel, pin: string): Promise<unknown> {
         if (!config || !config.apgAuthUrl) {
             throw new Error("apgAuthUrl no está definido en la configuración");
         }
@@ -53,7 +53,12 @@ class LoginService {
                 body
             );
             console.log("Login: login-client-app response received");
-            return clientAppResponse;
+            try {
+                return JSON.parse(clientAppResponse);
+            } catch (err) {
+                console.error("Login: cannot parse login-client-app response as JSON:", err);
+                throw new Error("Respuesta de login-client-app inválida (no es JSON)");
+            }
         } catch (error) {
             console.error("Login: error during login flow:", error);
             throw error;
