@@ -35,8 +35,10 @@ class LoginService {
             const loginClientAppUrl = config.apgUrl + "/auth/authenticate/login-client-app";
             console.log("Login: calling " + loginClientAppUrl);
             const body = JSON.stringify({
-                companyId: config.companyId,
-                terminalId: config.terminalId,
+                terminalData: Buffer.from(JSON.stringify({
+                    companyId: config.companyId,
+                    terminalId: config.terminalId
+                })).toString('base64'),
                 pin: pin,
                 clientDeviceId: config.clientDeviceId,
                 app: "EXPRESS"
