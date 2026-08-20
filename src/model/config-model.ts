@@ -5,5 +5,6 @@ export class ConfigModel {
   companyId: string;
   terminalId: string;
   apgUrl: string;
-  secret: string;
+  apgAuthUrl: string;
+  apgAuthData: string;
 }

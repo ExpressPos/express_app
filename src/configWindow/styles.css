@@ -12,10 +12,11 @@ body {
 
 .card {
     background-color: #f9f9f9;
-    padding: 1.5rem 2rem 2rem;
+    padding: 1.5rem 2.5rem 2rem;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    width: 320px;
+    width: 460px;
+    max-width: 100%;
     position: relative;
     text-align: left;
 }

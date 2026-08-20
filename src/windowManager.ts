@@ -79,8 +79,8 @@ class WindowManager {
       return this.configWindow;
     }
     const { width: screenWidth, height: screenHeight } = display.workAreaSize;
-    const windowWidth = Math.floor(screenWidth * 0.5);
-    const windowHeight = Math.floor(screenHeight * 0.5);
+    const windowWidth = Math.floor(screenWidth * 0.65);
+    const windowHeight = Math.floor(screenHeight * 0.8);
     const x = Math.floor((screenWidth - windowWidth) / 2);
     const y = Math.floor((screenHeight - windowHeight) / 2);
     this.configWindow = new BrowserWindow({
@@ -228,6 +228,10 @@ class WindowManager {
       this.sendToMainWindows({
         event: "echo-clientDeviceId",
         data: utils.getUUID()
+      })
+      this.sendToMainWindows({
+        event: "echo-clientTerminalData",
+        data: Buffer.from(JSON.stringify(config)).toString('base64')
       })
     });
     return this.mainWindow;

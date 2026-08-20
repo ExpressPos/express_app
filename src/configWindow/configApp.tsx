@@ -1,31 +1,27 @@
 import React, {useState} from "react";
 import "./styles.css";
 import { ConfigModel } from "src/model/config-model";
-import config from "forge.config";
 
 const ConfigApp = () => {
     const [selectedOption, setSelectedOption] = useState('');
     const [companyId, setCompanyId] = useState('');
     const [terminalId, setTerminalId] = useState('');
     const [urlAPG, setUrlAPG] = useState('');
-    const [secret, setSecret] = useState('');
+    const [apgAuthUrl, setApgAuthUrl] = useState('');
+    const [apgAuthData, setApgAuthData] = useState('');
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedOption(e.target.value);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (selectedOption && selectedOption !== '' &&
             companyId !== '' &&
             terminalId !== '' &&
             urlAPG !== '' &&
-            secret !== '') {
-            console.log('Valor seleccionado:', selectedOption);
-            console.log('companyId:', companyId);
-            console.log('terminalId:', terminalId);
-            console.log('urlAPG:', urlAPG);
-            console.log('secret:', secret);
+            apgAuthUrl !== '' &&
+            apgAuthData !== '') {
             try {
                 const config: ConfigModel = {
                     url: selectedOption,
@@ -34,7 +30,8 @@ const ConfigApp = () => {
                     companyId: companyId,
                     terminalId: terminalId,
                     apgUrl: urlAPG,
-                    secret: secret
+                    apgAuthUrl: apgAuthUrl,
+                    apgAuthData: apgAuthData
                 }
                 window.electronAPI.setConfig(JSON.stringify(config));
             } catch (error) {
@@ -68,6 +65,7 @@ const ConfigApp = () => {
                     <option value="https://argentina.geocom.com.uy">Argentina</option>
                     <option value="https://qaexpress.geocom.com.uy">QAExpress</option>
                     <option value="https://xprargentina.geocom.com.uy">XprArgentina</option>
+                    <option value="https://expresspos-test.firstdata.com">Fiserv CAT</option>
                 </select>
 
                 <label htmlFor="companyId">Company ID:</label>
@@ -88,22 +86,31 @@ const ConfigApp = () => {
                     placeholder="Terminal ID"
                 />
 
-                <label htmlFor="urlAPG">URL APG:</label>
+                <label htmlFor="urlAPG">APG Url:</label>
                 <input
                     id="urlAPG"
                     type="text"
                     value={urlAPG}
                     onChange={(e) => setUrlAPG(e.target.value)}
-                    placeholder="URL APG"
+                    placeholder="APG Url"
                 />
 
-                <label htmlFor="secret">Secret:</label>
+                <label htmlFor="apgAuthUrl">APG Auth Url:</label>
                 <input
-                    id="secret"
+                    id="apgAuthUrl"
+                    type="text"
+                    value={apgAuthUrl}
+                    onChange={(e) => setApgAuthUrl(e.target.value)}
+                    placeholder="APG Auth Url"
+                />
+
+                <label htmlFor="apgAuthData">APG Auth Data:</label>
+                <input
+                    id="apgAuthData"
                     type="password"
-                    value={secret}
-                    onChange={(e) => setSecret(e.target.value)}
-                    placeholder="Secret"
+                    value={apgAuthData}
+                    onChange={(e) => setApgAuthData(e.target.value)}
+                    placeholder="APG Auth Data"
                 />
 
                 <button className="save-button" type="submit">Guardar</button>

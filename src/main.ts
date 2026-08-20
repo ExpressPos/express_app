@@ -7,6 +7,7 @@ import {Utils} from "./config/utils";
 import WindowManager from "./windowManager";
 import { autoUpdater } from 'electron-updater';
 import { ConfigModel } from './model/config-model';
+import { LoginService } from './service/loginService';
 
 new Log();
 const utils = new Utils();
@@ -40,6 +41,7 @@ async function main() {
     //new Socket(config, printerManager);
     usbManager.startUsbListener();
     printerManager.startCheckPrinter();
+    const loginService = new LoginService();
 
     if (require('electron-squirrel-startup')) {
       app.quit();
@@ -65,6 +67,30 @@ async function main() {
         }
         if (args.event === "ticket_changed") {
           windowManager.sendToMainClientWindows(args);
+        }
+        if (args.event === "LOGIN_PIN") {
+          console.log("Event with name : LOGIN_PIN");
+          try {
+            const pin: string = args.data;
+            const loginResponse = await loginService.login(config.config, pin);
+            windowManager.sendToMainWindows({
+              event: "echo-login-result",
+              data: {
+                success: true,
+                data: loginResponse
+              }
+            });
+          } catch (error) {
+            console.error("Error during LOGIN_PIN handling:", error);
+            const detail = (error instanceof Error) ? error.message : String(error);
+            windowManager.sendToMainWindows({
+              event: "echo-login-result",
+              data: {
+                success: false,
+                data: { detail: detail }
+              }
+            });
+          }
         }
       } else {
         console.log("Event: " + JSON.stringify(args));

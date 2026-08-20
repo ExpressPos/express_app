@@ -43,7 +43,8 @@ class Config {
             companyId: data.companyId,
             terminalId: data.terminalId,
             apgUrl: data.apgUrl,
-            secret: data.secret
+            apgAuthUrl: data.apgAuthUrl,
+            apgAuthData: data.apgAuthData
         };
         configModel.clientDeviceId = this.utils.getUUID();
         this._config = configModel;
@@ -72,7 +73,7 @@ class Config {
         try {
             console.log('Fetching server config...');
             if (this.config != null) {
-                const response = await this.httpGetPromise(this.config.url + "/auth/config/web-application");
+                const response = await this.httpGetPromise(this.config.url + "/auth/application/web-application");
                 console.log('Server config: ' + response);
                 this._serverConfig = JSON.parse(response);
             } else {

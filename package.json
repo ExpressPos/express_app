@@ -82,8 +82,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/sockjs-client": "^1.5.4",
-    "@types/stompjs": "^2.3.9",
     "electron-log": "^5.3.4",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^8.2.0",
@@ -92,8 +90,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "serialport": "^12.0.0",
-    "sockjs-client": "^1.6.1",
-    "stompjs": "^2.3.3",
     "usb": "^2.13.0",
     "usb-detection": "^4.14.2",
     "vite-plugin-checker": "^0.7.2",
